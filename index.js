@@ -31,9 +31,8 @@ async function run() {
       const text = req.query.text;
       const brand = req.query.brand;
       const category = req.query.category;
-      console.log(brand, category, minPrice, maxPrice);
+
       const dd = date === "true" ? { creationDate: 1 } : { price: `${value}` };
-      // console.log(req.query);
       if (text) {
         try {
           productsLength = await productCollection
@@ -83,7 +82,6 @@ async function run() {
       }
       try {
         productsLength = await productCollection.estimatedDocumentCount();
-        console.log("Product Length ", productsLength);
         products = await productCollection
           .find()
           .skip(page * 6)
@@ -101,7 +99,6 @@ async function run() {
       const category = req.query.category;
       const minPrice = parseInt(req.query.minPrice);
       const maxPrice = parseInt(req.query.maxPrice);
-      console.log(brand, category, minPrice, maxPrice);
       const query = {
         $and: [],
       };
