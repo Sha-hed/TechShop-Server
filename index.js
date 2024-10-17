@@ -20,24 +20,67 @@ const client = new MongoClient(uri, {
 async function run() {
   const productCollection = client.db("SCIC").collection("products");
   const userCollection = client.db("SCIC").collection("users");
+  const cartCollection = client.db("SCIC").collection("cart");
   try {
+    app.get('/getCartItem/:email', async(req,res)=>{
+      const email = req.params.email
+      const filter = { email: email }
+      const result = await cartCollection.find(filter).toArray()
+      res.send(result)
+    })
+    app.post("/addToCart", async (req, res) => {
+      const cart = req.body;
+      const result = await cartCollection.insertOne(cart);
+      res.send(result);
+    });
+
+    app.patch("/updateProduct/:id", async (req, res) => {
+      const id = req.params.id;
+      const product = req.body;
+      console.log("Product dekh age ", product);
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          ...product,
+        },
+      };
+      const result = await productCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+      res.send(result);
+    });
+    app.delete("/delProduct/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log("Delete korar id ", id);
+      const filter = { _id: new ObjectId(id) };
+      const result = await productCollection.deleteOne(filter);
+      res.send(result);
+    });
+
+    app.get("/sobai", async (req, res) => {
+      const result = await productCollection.find().toArray();
+      res.send(result);
+    });
+
     app.get("/searchText", async (req, res) => {
-      const page = req.query?.page
+      const page = req.query?.page;
       const text = req.query?.text;
-      console.log(page, text)
       try {
         productsLength = await productCollection
           .find({ productName: { $regex: `${text}`, $options: "i" } })
           .toArray();
-        const result1 =productsLength.length;
+        const result1 = productsLength.length;
         const result2 = await productCollection
-        .find({ productName: { $regex: `${text}`, $options: "i" } })
-        .skip(page * 2)
-        .limit(2)
-        .toArray();
-        console.log('Result1 ',result1)
-        console.log('Result2 ',result2)
-        return res.status(404).send(result1, result2);
+          .find({ productName: { $regex: `${text}`, $options: "i" } })
+          .skip(page * 2)
+          .limit(2)
+          .toArray();
+        console.log("Result1 ", result1);
+        console.log("Result2 ", result2);
+        return res.send({ result1, result2 });
       } catch (error) {
         return res.status(404).json({ message: "No products found" });
       }
