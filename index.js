@@ -37,7 +37,6 @@ async function run() {
     app.patch("/updateProduct/:id", async (req, res) => {
       const id = req.params.id;
       const product = req.body;
-      console.log("Product dekh age ", product);
       const filter = { _id: new ObjectId(id) };
       const options = { upsert: true };
       const updateDoc = {
@@ -54,7 +53,6 @@ async function run() {
     });
     app.delete("/delProduct/:id", async (req, res) => {
       const id = req.params.id;
-      console.log("Delete korar id ", id);
       const filter = { _id: new ObjectId(id) };
       const result = await productCollection.deleteOne(filter);
       res.send(result);
@@ -78,8 +76,6 @@ async function run() {
           .skip(page * 2)
           .limit(2)
           .toArray();
-        console.log("Result1 ", result1);
-        console.log("Result2 ", result2);
         return res.send({ result1, result2 });
       } catch (error) {
         return res.status(404).json({ message: "No products found" });
@@ -145,13 +141,11 @@ async function run() {
       const filter = { _id: new ObjectId(id) };
       const result = await productCollection.findOne(filter);
       res.send(result);
-      // console.log('hits here')
-      // res.send({message: 'Man why?'})
+
     });
 
     app.get("/singleCategoryData/:category", async (req, res) => {
       const firstPage = parseInt(req.query?.page);
-      console.log("First Page koto ", firstPage);
       const so = parseInt(req.query?.sort) || 1;
       let soo =
         parseInt(req.query?.sort) === 0
@@ -159,8 +153,6 @@ async function run() {
           : parseInt(req.query?.sort) === 1
           ? { productPrice: 1 }
           : { productPrice: -1 };
-      // console.log('Output of soo ',soo)
-      // console.log('Value of So ', so)
       const category = req.params.category;
       const filter = { productCategory: category };
       const options = {
@@ -173,12 +165,11 @@ async function run() {
           productPrice: 1,
         },
       };
-      // console.log("Option check ", options);
       const result1 = await productCollection.countDocuments(filter);
       const result2 = await productCollection
         .find(filter, options)
-        .skip(firstPage * 4)
-        .limit(4)
+        .skip(firstPage * 3)
+        .limit(3)
         .toArray();
       res.send({ result1, result2 });
     });
@@ -194,7 +185,6 @@ async function run() {
       const filter = { email: email };
       const user = await userCollection.findOne(filter);
       let IsAdmin = user?.role === "admin";
-      console.log("Admin checkinig  ", IsAdmin);
       res.send({ IsAdmin });
     });
 
